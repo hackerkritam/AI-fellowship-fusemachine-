@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Verification Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>KYC Verification Debugger</h1>
+        <p>Use this page to test KYC verification without the UI</p>
+        
+        <div>
+            <label>Supabase URL: <input type="text" id="supabaseUrl" placeholder="https://xxx.supabase.co" style="width: 100%; max-width: 400px;"></label>
+        </div>
+        <div>
+            <label>Anon Key: <input type="password" id="anonKey" placeholder="eyJ..." style="width: 100%; max-width: 400px;"></label>
+        </div>
+        <div>
+            <label>KYC ID: <input type="text" id="kycId" placeholder="application-uuid" style="width: 100%; max-width: 400px;"></label>
+        </div>
+        
+        <button onclick="testVerification()">Test Verification</button>
+        <button onclick="checkStatus()">Check Application Status</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+        
+        let supabase = null;
+
+        window.testVerification = async function() {
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('anonKey').value;
+            const kycId = document.getElementById('kycId').value;
+
+            if (!url || !key || !kycId) {
+                log('❌ Please fill in all fields', 'error');
+                return;
+            }
+
+            supabase = createClient(url, key);
+            
+            log('🔄 Testing verification for KYC ID: ' + kycId, 'info');
+
+            try {
+                // Simulate verification
+                const faceMatchScore = Math.floor(Math.random() * 20) + 80;
+                const livenessScore = Math.floor(Math.random() * 15) + 85;
+                
+                log(`📊 Generated scores - Face Match: ${faceMatchScore}%, Liveness: ${livenessScore}%`, 'info');
+
+                const finalStatus = (faceMatchScore >= 75 && livenessScore >= 75) ? 'approved' : 'under_review';
+                
+                log(`📋 Updating status to: ${finalStatus}`, 'info');
+
+                const { data, error } = await supabase
+                    .from('kyc_applications')
+                    .update({
+                        status: finalStatus,
+                        face_match_score: faceMatchScore,
+                        liveness_score: livenessScore,
+                        updated_at: new Date().toISOString(),
+                    })
+                    .eq('id', kycId)
+                    .select()
+                    .single();
+
+                if (error) {
+                    log('❌ Database update failed: ' + error.message, 'error');
+                    return;
+                }
+
+                log('✅ Verification successful!', 'success');
+                log('Updated data: ' + JSON.stringify(data, null, 2), 'info');
+            } catch (e) {
+                log('❌ Error: ' + e.message, 'error');
+            }
+        };
+
+        window.checkStatus = async function() {
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('anonKey').value;
+            const kycId = document.getElementById('kycId').value;
+
+            if (!url || !key || !kycId) {
+                log('❌ Please fill in all fields', 'error');
+                return;
+            }
+
+            supabase = createClient(url, key);
+            
+            log('🔍 Fetching status for KYC ID: ' + kycId, 'info');
+
+            try {
+                const { data, error } = await supabase
+                    .from('kyc_applications')
+                    .select('*')
+                    .eq('id', kycId)
+                    .single();
+
+                if (error) {
+                    log('❌ Fetch failed: ' + error.message, 'error');
+                    return;
+                }
+
+                log('✅ Current Status: ' + JSON.stringify(data, null, 2), 'success');
+            } catch (e) {
+                log('❌ Error: ' + e.message, 'error');
+            }
+        };
+
+        window.clearLog = function() {
+            document.getElementById('log').innerHTML = '';
+        };
+
+        function log(msg, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const p = document.createElement('div');
+            p.className = type;
+            p.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>

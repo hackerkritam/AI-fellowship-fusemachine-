@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Background -->
+  <rect width="100" height="100" fill="#1e3a8a"/>
+  
+  <!-- Document symbol -->
+  <rect x="25" y="20" width="50" height="60" rx="2" fill="#3b82f6"/>
+  
+  <!-- Document lines (text) -->
+  <rect x="32" y="30" width="36" height="3" rx="1" fill="#ffffff"/>
+  <rect x="32" y="38" width="36" height="3" rx="1" fill="#ffffff"/>
+  <rect x="32" y="46" width="36" height="3" rx="1" fill="#ffffff"/>
+  <rect x="32" y="54" width="24" height="3" rx="1" fill="#ffffff"/>
+  
+  <!-- Checkmark in bottom right (verification) -->
+  <circle cx="70" cy="70" r="15" fill="#10b981"/>
+  <path d="M 65 70 L 68 73 L 75 66" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
