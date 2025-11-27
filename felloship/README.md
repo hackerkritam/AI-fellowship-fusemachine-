@@ -26,7 +26,7 @@ A comprehensive Know Your Customer (KYC) verification platform with AI-powered f
 git clone <repository-url>
 
 # Step 2: Navigate to the project directory
-cd verify-flow-main
+cd fusemachine
 
 # Step 3: Install dependencies
 npm install
